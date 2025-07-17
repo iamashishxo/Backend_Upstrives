@@ -6,7 +6,6 @@
 
 # BACKEND_UPSTRIVES
 
-<em>Empowering Seamless Backend Innovation for Future Growth</em>
 
 <!-- BADGES -->
 <img src="https://img.shields.io/github/last-commit/iamashishxo/Backend_Upstrives?style=flat&logo=git&logoColor=white&color=0080ff" alt="last-commit">
