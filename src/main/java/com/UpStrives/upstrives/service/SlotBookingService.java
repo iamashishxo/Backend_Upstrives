@@ -25,29 +25,27 @@ public class SlotBookingService {
 
     private final ExpertSessionSlotRepo repo;
     private final JavaMailSender mail;
-    
-    
 
     public SlotBookingService(ExpertSessionSlotRepo repo, JavaMailSender mail) {
-		super();
-		this.repo = repo;
-		this.mail = mail;
-	}
+        super();
+        this.repo = repo;
+        this.mail = mail;
+    }
 
-	/* ---- date/time window constants ---- */
-    private static final LocalTime START_AM    = LocalTime.of(9, 30);
+    /* ---- date/time window constants ---- */
+    private static final LocalTime START_AM = LocalTime.of(9, 30);
     private static final LocalTime LUNCH_START = LocalTime.of(13, 0);
-    private static final LocalTime LUNCH_END   = LocalTime.of(16, 0);
-    private static final LocalTime END_PM      = LocalTime.of(21, 30);
+    private static final LocalTime LUNCH_END = LocalTime.of(16, 0);
+    private static final LocalTime END_PM = LocalTime.of(21, 30);
 
     /* -------- public API -------- */
 
     public List<LocalTime> freeSlots(LocalDate date) {
         return repo.findBySessionDateAndStatus(date, ExpertSessionSlot.Status.FREE)
-                   .stream()
-                   .map(ExpertSessionSlot::getStartTime)
-                   .sorted()
-                   .toList();
+                .stream()
+                .map(ExpertSessionSlot::getStartTime)
+                .sorted()
+                .toList();
     }
 
     public List<CalendarDayResponse> calendar(int horizonDays) {
@@ -69,7 +67,6 @@ public class SlotBookingService {
         if (slot.getStatus() == ExpertSessionSlot.Status.BOOKED) {
             throw new IllegalStateException("Slot already booked");
         }
-        
 
         slot.setStatus(ExpertSessionSlot.Status.BOOKED);
         slot.setUser(user);
@@ -79,11 +76,6 @@ public class SlotBookingService {
         sendMail(user.getEmail(), date, time);
     }
 
-//    public List<ExpertSessionSlot> myUpcoming(User user) {
-//        return repo.findByUserAndSessionDateGreaterThanEqualOrderBySessionDateAscStartTimeAsc(
-//                user, LocalDate.now());
-//    }
-
     private void sendMail(String to, LocalDate d, LocalTime t) {
         SimpleMailMessage msg = new SimpleMailMessage();
         msg.setTo(to);
@@ -91,57 +83,53 @@ public class SlotBookingService {
         msg.setText("Your expert session is confirmed on " + d + " at " + t + ".\nMeeting link will be shared soon.");
         mail.send(msg);
     }
-    
-    
+
     public List<CalendarDaySlotsResponse> calendarWithSlots(int horizonDays) {
 
         LocalDate today = LocalDate.now();
 
         /* full fixed time list once */
         List<LocalTime> FULL_LIST = new ArrayList<>();
-        for (LocalTime t = LocalTime.of(9,30);
-             !t.isAfter(LocalTime.of(21,30));
-             t = t.plusMinutes(30)) {
+        for (LocalTime t = LocalTime.of(9, 30); !t.isAfter(LocalTime.of(21, 30)); t = t.plusMinutes(30)) {
 
-            if (t.isBefore(LocalTime.of(13,0)) ||
-                !t.isBefore(LocalTime.of(16,0))) {
+            if (t.isBefore(LocalTime.of(13, 0)) ||
+                    !t.isBefore(LocalTime.of(16, 0))) {
                 FULL_LIST.add(t);
             }
         }
 
         return IntStream.rangeClosed(0, horizonDays - 1)
-            .mapToObj(i -> {
-                LocalDate date = today.plusDays(i);
+                .mapToObj(i -> {
+                    LocalDate date = today.plusDays(i);
 
-                /* start every slot as free (1) */
-                Map<String,Integer> map = FULL_LIST.stream()
-                    .collect(Collectors.toMap(
-                        LocalTime::toString,
-                        t -> 1,
-                        (a,b) -> a,
-                        LinkedHashMap::new));          // keep order
+                    /* start every slot as free (1) */
+                    Map<String, Integer> map = FULL_LIST.stream()
+                            .collect(Collectors.toMap(
+                                    LocalTime::toString,
+                                    t -> 1,
+                                    (a, b) -> a,
+                                    LinkedHashMap::new)); // keep order
 
-                /* set to 0 if booked */
-                repo.findBySessionDate(date)
-                    .forEach(slot ->
-                        map.put(slot.getStartTime().toString(),
-                                slot.getStatus() == ExpertSessionSlot.Status.FREE ? 1 : 0)
-                    );
+                    /* set to 0 if booked */
+                    repo.findBySessionDate(date)
+                            .forEach(slot -> map.put(slot.getStartTime().toString(),
+                                    slot.getStatus() == ExpertSessionSlot.Status.FREE ? 1 : 0));
 
-                return new CalendarDaySlotsResponse(date.toString(), map);
-            })
-            .toList();
+                    return new CalendarDaySlotsResponse(date.toString(), map);
+                })
+                .toList();
     }
-  //alternatative  to delete records from db 
+
+    // alternatative to delete records from db
     @PostConstruct
     public void cleanOldSlotsOnStartup() {
-    	repo.deleteOldUnbookedSlots(LocalDate.now());
-    	System.out.println("Old unbooked slots removed from Db ");
+        repo.deleteOldUnbookedSlots(LocalDate.now());
+        System.out.println("Old unbooked slots removed from Db ");
     }
-    //Schedulet to delete records
-//    @Scheduled(cron = "0 0 1 * * ?") // Runs daily at 1 AM
-//    public void cleanOldSlotsDaily() {
-//    	repo.deleteOldUnbookedSlots(LocalDate.now());
-//    	System.out.println("Old unbooked slots cleaned at 1 AM");
-//    }
+    // Schedulet to delete records
+    // @Scheduled(cron = "0 0 1 * * ?") // Runs daily at 1 AM
+    // public void cleanOldSlotsDaily() {
+    // repo.deleteOldUnbookedSlots(LocalDate.now());
+    // System.out.println("Old unbooked slots cleaned at 1 AM");
+    // }
 }
