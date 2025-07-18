@@ -79,11 +79,6 @@ public class SlotBookingService {
         sendMail(user.getEmail(), date, time);
     }
 
-//    public List<ExpertSessionSlot> myUpcoming(User user) {
-//        return repo.findByUserAndSessionDateGreaterThanEqualOrderBySessionDateAscStartTimeAsc(
-//                user, LocalDate.now());
-//    }
-
     private void sendMail(String to, LocalDate d, LocalTime t) {
         SimpleMailMessage msg = new SimpleMailMessage();
         msg.setTo(to);
