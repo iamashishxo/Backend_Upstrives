@@ -14,7 +14,7 @@ public class SecurityConfig {
         http
           .csrf(csrf -> csrf.disable())
           .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/**").permitAll()   // 👈 open your APIs
+                .requestMatchers("/api/**").permitAll()   
                 .anyRequest().authenticated())
           .sessionManagement(sm ->
                 sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
