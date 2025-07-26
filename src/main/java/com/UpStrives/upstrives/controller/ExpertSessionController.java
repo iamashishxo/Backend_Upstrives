@@ -36,15 +36,6 @@ public class ExpertSessionController {
     public List<CalendarDayResponse> calendar(@RequestParam(defaultValue = "14") int days) {
         return service.calendar(days);
     }
-
-//    @GetMapping("/slots")
-//    public SlotListResponse slots(@RequestParam String date) {
-//        LocalDate d = LocalDate.parse(date);
-//        List<String> free = service.freeSlots(d).stream()
-//                                   .map(LocalTime::toString)
-//                                   .toList();
-//        return new SlotListResponse(date, free);
-//    }
 	
 	@GetMapping("/slots")
 	public ResponseEntity<?> slots(@RequestParam String date) {
