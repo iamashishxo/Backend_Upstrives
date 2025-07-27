@@ -61,35 +61,6 @@ public class ExpertSessionController {
 	    return ResponseEntity.ok(new SlotListResponse(date, free));
 	}
 
-//    @PostMapping("/book")
-//    public ResponseEntity<String> book(@RequestBody BookingRequest req) {
-//
-//       
-//        User user = userRepo.findByEmail(req.getEmail())
-//                            .orElse(null);
-//
-//        if (user == null || !encoder.matches(req.getPassword(), user.getPassword())) {
-//            return ResponseEntity
-//                    .status(HttpStatus.UNAUTHORIZED)
-//                    .body("Invalid credentials");
-//        }
-//        try {
-//        	service.book(
-//                    LocalDate.parse(req.getDate()),
-//                    LocalTime.parse(req.getTime()),
-//                    user);
-//
-//            return ResponseEntity.status(HttpStatus.CREATED)
-//                                 .body("Slot booked for "
-//                                       + req.getDate() + " " + req.getTime());
-//
-//        } catch (IllegalStateException ex) {             
-//            return ResponseEntity
-//                    .status(HttpStatus.CONFLICT)        
-//                    .body("Slot already booked");
-//        }
-//
-//    }
 	@PostMapping("/book")
 	public ResponseEntity<String> book(@RequestBody BookingRequest req) {
 
