@@ -50,16 +50,60 @@ public class SlotBookingService {
                    .toList();
     }
 
-    public List<CalendarDayResponse> calendar(int horizonDays) {
+        public List<CalendarDayResponse> calendar(int days) {
         LocalDate today = LocalDate.now();
-        return IntStream.rangeClosed(0, horizonDays - 1)
-                .mapToObj(i -> {
-                    LocalDate d = today.plusDays(i);
-                    boolean bookable = repo.countBySessionDateAndStatus(d, ExpertSessionSlot.Status.FREE) > 0;
-                    return new CalendarDayResponse(d.toString(), bookable);
-                })
-                .collect(Collectors.toList());
+        LocalTime nextSlotTime = nextBookableTime();
+
+        List<CalendarDayResponse> calendarDays = new ArrayList<>();
+
+        for (int i = 0; i < days; i++) {
+            LocalDate date = today.plusDays(i);
+            List<ExpertSessionSlot> slots = repo.findBySessionDate(date);
+
+            List<ExpertSessionSlot> availableSlots;
+
+            if (date.equals(today)) {
+                // Filter only future slots today
+                availableSlots = slots.stream()
+                        .filter(slot -> !slot.isBooked() &&
+                                slot.getSessionTime().isAfter(nextSlotTime))
+                        .toList();
+            } else {
+                // For future dates, include all unbooked slots
+                availableSlots = slots.stream()
+                        .filter(slot -> !slot.isBooked())
+                        .toList();
+            }
+
+            boolean isBookable = !availableSlots.isEmpty();
+            calendarDays.add(new CalendarDayResponse(date.toString(), isBookable));
+        }
+
+        return calendarDays;
     }
+
+    // Utility method to round up to next 30-minute block
+    private LocalTime nextBookableTime() {
+        LocalTime now = LocalTime.now();
+        int minute = now.getMinute();
+
+        if (minute < 30) {
+            return now.withMinute(30).withSecond(0).withNano(0);
+        } else {
+            return now.plusHours(1).withMinute(0).withSecond(0).withNano(0);
+        }
+    }
+
+    // public List<CalendarDayResponse> calendar(int horizonDays) {
+    //     LocalDate today = LocalDate.now();
+    //     return IntStream.rangeClosed(0, horizonDays - 1)
+    //             .mapToObj(i -> {
+    //                 LocalDate d = today.plusDays(i);
+    //                 boolean bookable = repo.countBySessionDateAndStatus(d, ExpertSessionSlot.Status.FREE) > 0;
+    //                 return new CalendarDayResponse(d.toString(), bookable);
+    //             })
+    //             .collect(Collectors.toList());
+    // }
 
     @Transactional
     public void book(LocalDate date, LocalTime time, User user) {
