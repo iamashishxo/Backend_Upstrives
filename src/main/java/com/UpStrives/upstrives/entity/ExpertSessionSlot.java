@@ -52,6 +52,16 @@ public class ExpertSessionSlot {
         this.createdAt = LocalDateTime.now();
     }
 
+	 // Check if this slot is booked
+    public boolean isBooked() {
+        return this.status == Status.BOOKED;
+    }
+
+    // Return the session time (startTime)
+    public LocalTime getSessionTime() {
+        return this.startTime;
+    }
+
 	public Long getId() {
 		return id;
 	}
