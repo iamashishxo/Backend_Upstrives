@@ -57,7 +57,7 @@ public class SlotBookingService {
         List<CalendarDayResponse> calendarDays = new ArrayList<>();
 
         for (int i = 0; i < days; i++) {
-            LocalDate date = today.plusDays(i);
+            LocalDate date = today.plusDays(i+1);
             List<ExpertSessionSlot> slots = repo.findBySessionDate(date);
 
             List<ExpertSessionSlot> availableSlots;
@@ -148,7 +148,7 @@ public class SlotBookingService {
             }
         }
 
-        return IntStream.rangeClosed(0, horizonDays - 1)
+        return IntStream.rangeClosed(1, horizonDays)
             .mapToObj(i -> {
                 LocalDate date = today.plusDays(i);
 
